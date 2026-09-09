@@ -1,0 +1,132 @@
+{
+  "title": "SoftwareCompany 多智能体协作演示",
+  "generated_at": "2026-09-09T13:35:21.653540",
+  "stats": {
+    "engineers": 3,
+    "total_scores": 13,
+    "avg_score": 7.98,
+    "sessions": 2
+  },
+  "engineers": [
+    {
+      "id": "PK",
+      "count": 2,
+      "avg": 8.0
+    },
+    {
+      "id": "RD",
+      "count": 9,
+      "avg": 8.02
+    },
+    {
+      "id": "UI",
+      "count": 2,
+      "avg": 7.75
+    }
+  ],
+  "trend": [
+    {
+      "engineer_id": "RD",
+      "score": 7.5,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-05 11:23:13.482591"
+    },
+    {
+      "engineer_id": "RD",
+      "score": 8.0,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-05 11:23:48.897893"
+    },
+    {
+      "engineer_id": "RD",
+      "score": 8.0,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-05 11:43:53.053074"
+    },
+    {
+      "engineer_id": "RD",
+      "score": 8.0,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-05 12:08:19.844073"
+    },
+    {
+      "engineer_id": "RD",
+      "score": 8.0,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-05 12:08:38.017312"
+    },
+    {
+      "engineer_id": "UI",
+      "score": 7.5,
+      "task_type": "visualization",
+      "timestamp": "2026-04-05 20:25:18.935762"
+    },
+    {
+      "engineer_id": "UI",
+      "score": 8.0,
+      "task_type": "visualization",
+      "timestamp": "2026-04-05 20:25:47.426342"
+    },
+    {
+      "engineer_id": "RD",
+      "score": 8.0,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-05 21:04:50.066758"
+    },
+    {
+      "engineer_id": "RD",
+      "score": 8.2,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-05 21:05:37.731050"
+    },
+    {
+      "engineer_id": "RD",
+      "score": 8.5,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-07 10:29:31.013255"
+    },
+    {
+      "engineer_id": "RD",
+      "score": 8.0,
+      "task_type": "python_teaching",
+      "timestamp": "2026-04-07 10:29:58.082094"
+    },
+    {
+      "engineer_id": "PK",
+      "score": 8.0,
+      "task_type": "exercise",
+      "timestamp": "2026-04-07 11:25:24.529305"
+    },
+    {
+      "engineer_id": "PK",
+      "score": 8.0,
+      "task_type": "exercise",
+      "timestamp": "2026-04-07 11:25:48.624107"
+    }
+  ],
+  "dims_avg": {
+    "comment": 8.54,
+    "structure": 7.92,
+    "difficulty": 8.08,
+    "completeness": 7.38
+  },
+  "task_types": {
+    "python_teaching": 9,
+    "visualization": 2,
+    "exercise": 2
+  },
+  "sessions": [
+    {
+      "role": "user",
+      "time": "11:23",
+      "content": "请出4道关于数据结构与算法的Python 3.x练习题（大学一年级 · 编程入门水平），包含标准答案和常见错误提示",
+      "session_id": "afca7755a46741cab6108a18b76ab0cb"
+    },
+    {
+      "role": "assistant",
+      "time": "11:25",
+      "content": "已分配工程师：Charlie · 习题设计工程师正在执行 PrepareDocuments...请出4道关于数据结构与算法的Python 3.x练习题（大学一年级 · 编程入门水平），包含标准答案和常见错误提示\n[教学背景：目标受众：大学一年级 · 编程入门, 编程语言：Python 3.x, 知识点领域：数据结构与算法]PrepareDocuments 执行完成正在分析需求，编写教学目标...{\"Language\":\"zh_cn\",\"Programming Language…",
+      "session_id": "afca7755a46741cab6108a18b76ab0cb"
+    }
+  ]
+}

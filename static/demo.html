@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SoftwareCompany 多智能体协作演示</title>
+<script src="echarts.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: #0b1220; color: #e2e8f0; min-height: 100vh;
+}
+header {
+  padding: 22px 32px; background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+  border-bottom: 1px solid #2d4a5e;
+}
+header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+header p { color: #8fa7b3; font-size: 13px; margin-top: 6px; }
+main { padding: 26px 32px; max-width: 1280px; margin: 0 auto; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 26px; }
+.card {
+  background: #14202e; border: 1px solid #294157; border-radius: 14px; padding: 20px; text-align: center;
+}
+.card .num { font-size: 34px; font-weight: 800; color: #4fd1c5; }
+.card .lbl { color: #7f99ad; font-size: 13px; margin-top: 6px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 26px; }
+.box { background: #14202e; border: 1px solid #294157; border-radius: 14px; padding: 18px; }
+.box h3 { font-size: 14px; color: #b8ccd9; margin-bottom: 12px; }
+.chart { height: 280px; }
+.engineers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 26px; }
+.eng {
+  background: #14202e; border: 1px solid #294157; border-radius: 14px; padding: 18px;
+  display: flex; align-items: center; gap: 16px;
+}
+.eng .avatar {
+  width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 20px; color: #0b1220;
+}
+.eng .name { font-size: 16px; font-weight: 700; }
+.eng .meta { color: #7f99ad; font-size: 12px; margin-top: 4px; }
+.eng .score { margin-left: auto; text-align: right; }
+.eng .score .v { font-size: 22px; font-weight: 800; }
+.eng .score .l { color: #7f99ad; font-size: 11px; }
+.tl { list-style: none; max-height: 320px; overflow: auto; }
+.tl li {
+  padding: 12px 14px; border-left: 3px solid #4fd1c5; background: #1a2a3a;
+  margin-bottom: 10px; border-radius: 8px; font-size: 13px; line-height: 1.6;
+}
+.tl li .t { color: #4fd1c5; font-size: 11px; margin-bottom: 4px; }
+.tl li .r { color: #8fa7b3; font-size: 11px; }
+.tl li.user { border-left-color: #f0a35e; }
+.tl li .tag {
+  display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-right: 8px;
+}
+.tag.user { background: #3a2a1a; color: #f0a35e; }
+.tag.assistant { background: #1a3a30; color: #4fd1c5; }
+.note { color: #5c7285; font-size: 12px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="ttl">SoftwareCompany 多智能体协作演示</h1>
+  <p id="sub">AHP 分派 · RTSM 绩效评估 · 数据来自 performance.db</p>
+</header>
+<main>
+  <section class="cards" id="cards"></section>
+  <section class="engineers" id="engs"></section>
+  <section class="grid2">
+    <div class="box"><h3>工程师绩效趋势（最近 50 条评分）</h3><div id="chart-trend" class="chart"></div></div>
+    <div class="box"><h3>任务类型分布</h3><div id="chart-type" class="chart"></div></div>
+  </section>
+  <section class="grid2">
+    <div class="box"><h3>四维能力评分（comment / structure / difficulty / completeness）</h3><div id="chart-dims" class="chart"></div></div>
+    <div class="box"><h3>协作会话时间线</h3><ul class="tl" id="tl"></ul></div>
+  </section>
+</main>
+<script>
+async function load() {
+  const d = await fetch("demo_data.json").then(r => r.json());
+  document.getElementById("ttl").textContent = d.title;
+  const s = d.stats;
+  const cards = [
+    ["工程师生", s.engineers], ["绩效评分", s.total_scores],
+    ["平均得分", s.avg_score], ["协作会话", s.sessions],
+  ];
+  document.getElementById("cards").innerHTML = cards.map(([l, v]) =>
+    `<div class="card"><div class="num">${v}</div><div class="lbl">${l}</div></div>`).join("");
+
+  const colors = { RD: "#4fd1c5", UI: "#7aa2f7", PK: "#f0a35e" };
+  const roles = { RD: "研发工程师", UI: "UI 工程师", PK: "产品/需求工程师" };
+  document.getElementById("engs").innerHTML = d.engineers.map(e =>
+    `<div class="eng">
+       <div class="avatar" style="background:${colors[e.id]}">${e.id}</div>
+       <div><div class="name">${roles[e.id] || e.id}</div><div class="meta">${e.id} · 评分 ${e.count} 次</div></div>
+       <div class="score"><div class="v" style="color:${colors[e.id]}">${e.avg}</div><div class="l">平均分</div></div>
+     </div>`).join("");
+
+  const trend = echarts.init(document.getElementById("chart-trend"), "dark");
+  const byEng = {};
+  d.trend.forEach(t => { (byEng[t.engineer_id] = byEng[t.engineer_id] || []).push(t); });
+  trend.setOption({
+    tooltip: { trigger: "axis" },
+    xAxis: { type: "category", data: d.trend.map(t => (t.timestamp || "").slice(5, 16)) },
+    yAxis: { type: "value", min: 0, max: 10 },
+    legend: { data: Object.keys(byEng) },
+    series: Object.entries(byEng).map(([k, arr]) => ({
+      name: k, type: "line", showSymbol: false, smooth: true,
+      data: arr.map(t => t.score), color: colors[k] || "#4fd1c5",
+    })),
+  });
+
+  const type = echarts.init(document.getElementById("chart-type"), "dark");
+  const labels = { python_teaching: "教学任务", visualization: "可视化", exercise: "习题设计" };
+  type.setOption({
+    tooltip: { trigger: "item" },
+    series: [{
+      type: "pie", radius: ["42%", "72%"],
+      data: Object.entries(d.task_types).map(([k, v]) => ({ name: labels[k] || k, value: v })),
+    }],
+  });
+
+  const dims = echarts.init(document.getElementById("chart-dims"), "dark");
+  dims.setOption({
+    tooltip: {},
+    radar: {
+      indicator: [
+        { name: "comment", max: 10 }, { name: "structure", max: 10 },
+        { name: "difficulty", max: 10 }, { name: "completeness", max: 10 },
+      ],
+      radius: "65%",
+    },
+    series: [{
+      type: "radar",
+      data: [{ value: Object.values(d.dims_avg), name: "团队平均", areaStyle: { opacity: 0.25 } }],
+    }],
+  });
+
+  const tl = document.getElementById("tl");
+  if (!d.sessions.length) {
+    tl.innerHTML = '<li class="note">暂无会话记录</li>';
+  } else {
+    tl.innerHTML = d.sessions.map(m =>
+      `<li class="${m.role}">
+         <div class="t">${m.time || ""} <span class="tag ${m.role}">${m.role === "user" ? "用户" : "智能体"}</span></div>
+         <span class="r">${m.role === "user" ? "提问" : "协作流转"}</span> ${m.content}
+       </li>`).join("");
+  }
+  window.addEventListener("resize", () => [trend, type, dims].forEach(c => c.resize()));
+}
+load();
+</script>
+</body>
+</html>
