@@ -48,7 +48,7 @@ python backend/app.py   # 默认 uvicorn 33210
 *（内容由AI生成，仅供参考）*
 
 
-## 零配置演示工作台（推荐面试演示）
+## 零配置演示工作台
 
 无需任何 API Key、无需 MetaGPT，即可体验完整的多智能体协作交互：
 
