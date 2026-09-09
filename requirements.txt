@@ -1,0 +1,6 @@
+mdutils==1.6.0
+aiozipstream==0.4
+aioboto3~=11.3.0
+fastapi
+uvicorn
+metagpt>=0.6.6,<0.7
