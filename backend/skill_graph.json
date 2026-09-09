@@ -1,0 +1,96 @@
+{
+  "html": {
+    "css": 0.9,
+    "javascript": 0.85,
+    "react": 0.7,
+    "vue": 0.65
+  },
+  "css": {
+    "html": 0.9,
+    "javascript": 0.75,
+    "react": 0.6,
+    "vue": 0.55
+  },
+  "javascript": {
+    "html": 0.85,
+    "css": 0.75,
+    "react": 0.8,
+    "vue": 0.75
+  },
+  "react": {
+    "html": 0.7,
+    "css": 0.6,
+    "javascript": 0.8,
+    "vue": 0.6
+  },
+  "vue": {
+    "html": 0.65,
+    "css": 0.55,
+    "javascript": 0.75,
+    "react": 0.6
+  },
+  "python": {
+    "pandas": 0.9,
+    "numpy": 0.85,
+    "scikit-learn": 0.8,
+    "flask": 0.7
+  },
+  "pandas": {
+    "python": 0.9,
+    "numpy": 0.8,
+    "scikit-learn": 0.7,
+    "matplotlib": 0.65
+  },
+  "numpy": {
+    "python": 0.85,
+    "pandas": 0.8,
+    "scikit-learn": 0.85,
+    "tensorflow": 0.7
+  },
+  "flask": {
+    "python": 0.7,
+    "fastapi": 0.8,
+    "django": 0.65,
+    "restful api": 0.85
+  },
+  "fastapi": {
+    "flask": 0.85,
+    "django": 0.78,
+    "python": 0.98,
+    "postgresql": 0.88
+  },
+  "django": {
+    "python": 0.8,
+    "flask": 0.75,
+    "restful api": 0.8
+  },
+  "scikit-learn": {
+    "python": 0.85,
+    "numpy": 0.9,
+    "pandas": 0.8,
+    "tensorflow": 0.75
+  },
+  "tensorflow": {
+    "python": 0.8,
+    "numpy": 0.85,
+    "scikit-learn": 0.75
+  },
+  "figma": {
+    "ui": 0.95,
+    "ux": 0.9,
+    "react": 0.6,
+    "vue": 0.55
+  },
+  "sketch": {
+    "ui": 0.93,
+    "ux": 0.88,
+    "react": 0.58,
+    "vue": 0.53
+  },
+  "animation": {
+    "css": 0.8,
+    "javascript": 0.85,
+    "react": 0.7,
+    "vue": 0.68
+  }
+}
