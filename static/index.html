@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCode · AI编程教学辅助平台</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --bg2: #F6F8FA;
+    --bg3: #E6EBF1;
+    --border: rgba(31,35,40,0.12);
+    --border-bright: rgba(31,35,40,0.2);
+    --text-primary: #1F2328;
+    --text-secondary: #636C76;
+    --text-muted: #6E7781;
+    --accent: #1F883D;
+    --accent2: #0969DA;
+    --accent3: #9A6700;
+    --accent-glow: rgba(31,136,61,0.08);
+    --accent2-glow: rgba(9,105,218,0.06);
+    --red: #CF222E;
+    --purple: #8250DF;
+    --teal: #1A7F37;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Noto Sans SC', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── 顶部导航栏 ── */
+  .topbar {
+    height: 52px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .logo-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: linear-gradient(90deg, #1F2328, #636C76);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-left: 2px;
+  }
+
+  .topbar-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg3);
+    padding: 3px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+  }
+
+  .tab-btn {
+    padding: 5px 18px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-family: 'Noto Sans SC', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 400;
+  }
+  .tab-btn.active {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-weight: 500;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(46,160,67,0.3);
+    border-radius: 20px;
+    font-size: 11.5px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .dot-green { width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.8)} }
+
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0969DA, #8250DF);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ── 主体布局 ── */
+  .main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── 左侧面板 ── */
+  .sidebar {
+    width: 260px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+  }
+  .sidebar.collapsed { width: 0; border-right: none; }
+
+  .sidebar-section {
+    padding: 16px 14px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding: 0 2px;
+  }
+
+  /* 教学设置区 */
+  .setting-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .setting-row label {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  .setting-select {
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px;
+    padding: 7px 10px;
+    font-family: 'Noto Sans SC', sans-serif;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238B949E'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .setting-select:focus { border-color: var(--accent2); }
+
+  /* 智能体团队 */
+  .agent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 2px 0;
+  }
+
+  .agent-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+    border: 1px solid transparent;
+  }
+  .agent-item:hover { background: var(--bg3); border-color: var(--border); }
+  .agent-item.active { background: rgba(56,139,253,0.08); border-color: rgba(56,139,253,0.4); box-shadow: 0 0 10px rgba(56,139,253,0.1); }
+
+  .agent-avatar {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .agent-avatar.pm { background: linear-gradient(135deg, #667eea22, #764ba222); border: 1px solid #667eea33; }
+  .agent-avatar.cto { background: linear-gradient(135deg, #f093fb22, #f5576c22); border: 1px solid #f5576c33; }
+  .agent-avatar.rd { background: linear-gradient(135deg, #4facfe22, #00f2fe22); border: 1px solid #4facfe33; }
+  .agent-avatar.ui { background: linear-gradient(135deg, #43e97b22, #38f9d722); border: 1px solid #43e97b33; }
+  .agent-avatar.pk { background: linear-gradient(135deg, #fa709a22, #fee14022); border: 1px solid #fa709a33; }
+
+  .agent-status {
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    border: 2px solid var(--bg2);
+  }
+  .agent-status.online { background: var(--accent); }
+  .agent-status.busy { background: var(--accent3); animation: pulse 1s infinite; }
+  .agent-status.idle { background: var(--text-muted); }
+
+  .agent-info { flex: 1; min-width: 0; }
+  .agent-name {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .agent-role {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .agent-tag {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 9.5px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+  .tag-pm { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .tag-cto { background: rgba(248,81,73,0.12); color: var(--red); }
+  .tag-rd { background: rgba(56,139,253,0.15); color: var(--accent2); }
+  .tag-ui { background: rgba(46,160,67,0.15); color: var(--accent); }
+  .tag-pk { background: rgba(210,153,34,0.15); color: var(--accent3); }
+
+  .agent-score {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .score-val {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .score-label { font-size: 9.5px; color: var(--text-muted); }
+
+  .agent-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .progress-val {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* 分派统计 */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 2px 0;
+  }
+  .stat-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    transition: all 0.3s;
+  }
+  .stat-num {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(135deg, var(--accent2), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .stat-desc { font-size: 10px; color: var(--text-muted); margin-top: 4px; font-weight: 400; }
+  
+  .highlight-pulse { animation: highlight-pulse-anim 0.8s ease; }
+  @keyframes highlight-pulse-anim {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.1); filter: brightness(1.5); }
+    100% { transform: scale(1); filter: brightness(1); }
+  }
+
+  .sidebar-footer {
+    padding: 12px 14px;
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+  }
+
+  .new-session-btn {
+    width: 100%;
+    padding: 9px;
+    background: linear-gradient(135deg, rgba(46,160,67,0.15), rgba(56,139,253,0.1));
+    border: 1px solid rgba(46,160,67,0.3);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 12.5px;
+    font-family: 'Noto Sans SC', sans-serif;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .new-session-btn:hover {
+    background: linear-gradient(135deg, rgba(46,160,67,0.25), rgba(56,139,253,0.18));
+    border-color: rgba(46,160,67,0.5);
+  }
+
+  /* ── 中间主聊天区 ── */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--bg);
+    position: relative;
+  }
+
+  /* 对话内容区 */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  /* 欢迎屏 */
+  .welcome-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 32px;
+  }
+
+  .welcome-hero {
+    text-align: center;
+  }
+
+  .welcome-icon {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 40px rgba(46,160,67,0.2);
+  }
+
+  .welcome-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    letter-spacing: 0.01em;
+  }
+
+  .welcome-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 480px;
+    font-weight: 300;
+  }
+
+  .quick-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .quick-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .quick-card:hover {
+    border-color: var(--border-bright);
+    background: var(--bg3);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  }
+
+  .qc-icon { font-size: 18px; margin-bottom: 8px; }
+  .qc-title { font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .qc-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+  /* 消息气泡 */
+  .msg-row {
+    padding: 4px 28px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .msg-row.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .msg-avatar.user-av { background: linear-gradient(135deg, #0969DA, #8250DF); }
+  .msg-avatar.bot-av { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+
+  .msg-content { max-width: 72%; }
+
+  .msg-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .msg-row.user .msg-meta { flex-direction: row-reverse; }
+
+  .msg-sender { font-weight: 500; color: var(--text-secondary); }
+
+  .msg-bubble {
+    padding: 12px 15px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+
+  .msg-row.user .msg-bubble {
+    background: rgba(56,139,253,0.12);
+    border: 1px solid rgba(56,139,253,0.2);
+    border-radius: 12px 4px 12px 12px;
+    color: var(--text-primary);
+  }
+
+  .msg-row.bot .msg-bubble {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px 12px 12px 12px;
+    color: var(--text-primary);
+  }
+
+  /* 流程步骤展示 */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12.5px;
+    transition: all 0.2s;
+  }
+  .flow-step.done { border-color: rgba(46,160,67,0.25); background: rgba(46,160,67,0.05); }
+  .flow-step.running { border-color: rgba(56,139,253,0.3); background: rgba(56,139,253,0.06); }
+  .flow-step.failed { border-color: rgba(248,81,73,0.3); background: rgba(248,81,73,0.06); }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255, 165, 0, 0.3);
+    border-top: 2px solid orange;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  .step-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-icon.done { background: var(--accent); color: white; }
+  .step-icon.running { background: rgba(56,139,253,0.2); color: var(--accent2); border: 1px solid var(--accent2); }
+  .step-icon.pending { background: var(--bg); border: 1px solid var(--text-muted); color: var(--text-muted); }
+  .step-icon.failed { background: var(--red); color: white; }
+
+  .step-body { flex: 1; }
+  .step-title { font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+  .step-detail { font-size: 11.5px; color: var(--text-secondary); }
+
+  .step-who {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* 步骤卡片新样式 */
+  .step-card { 
+      display: flex; align-items: flex-start; gap: 10px; 
+      padding: 8px 12px; margin: 4px 0; 
+      background: rgba(31,35,40,0.03); 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      animation: stepFadeIn 0.3s ease; 
+  }
+  .step-card .step-icon { font-size: 14px; margin-top: 1px; }
+  .step-card .step-info { display: flex; flex-direction: column; gap: 2px; }
+  .step-card .step-action { font-size: 13px; font-weight: 500; color: var(--accent2); }
+  .step-card .step-desc   { font-size: 12px; color: var(--text-muted); }
+  @keyframes stepFadeIn { 
+      from { opacity: 0; transform: translateY(4px); } 
+      to   { opacity: 1; transform: translateY(0); } 
+  }
+
+  /* 流式正文内容与光标 [DONE: 修复二 2.3] */
+  .stream-content { position: relative; }
+  .stream-content::after { 
+      content: '▋'; 
+      color: var(--accent2); 
+      animation: blink 0.8s step-end infinite; 
+      margin-left: 2px;
+  }
+  .stream-content.done::after { display: none; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* 代码展示块 */
+  .code-preview {
+    margin-top: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .code-header:hover { background: rgba(31,35,40,0.03); }
+
+  .code-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .code-body {
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    background: var(--bg);
+  }
+  .code-body.expanded {
+    max-height: 800px;
+    padding: 12px;
+    overflow-y: auto;
+  }
+
+  .code-body pre {
+    margin: 0;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .code-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    background: rgba(0,0,0,0.1);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .code-copy {
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .code-copy:hover { border-color: var(--border-bright); color: var(--text-primary); }
+
+  .arrow-icon {
+    width: 12px; height: 12px;
+    transition: transform 0.3s;
+    fill: var(--text-muted);
+  }
+  .arrow-icon.expanded { transform: rotate(180deg); }
+
+  /* 完成卡片 */
+  .finish-card {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(46,160,67,0.1), rgba(56,139,253,0.05));
+    border: 1px solid rgba(46,160,67,0.3);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    animation: slideUp 0.5s ease-out;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  .finish-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .finish-info {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .finish-actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .btn-primary {
+    flex: 1;
+    padding: 10px 20px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(46,160,67,0.25);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(46,160,67,0.35); filter: brightness(1.1); }
+  .btn-primary.loading { opacity: 0.8; cursor: wait; }
+
+  .btn-secondary {
+    padding: 10px 20px;
+    background: var(--bg3);
+    color: var(--text-primary);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* 并行任务区块 */
+  .parallel-section {
+    margin-top: 14px;
+    padding: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .parallel-header {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .parallel-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .p-name { width: 70px; font-size: 11.5px; color: var(--text-primary); }
+  .p-track { flex: 1; height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+  .p-fill { height: 100%; background: var(--accent2); transition: width 0.3s; }
+  .p-status { font-size: 10px; color: var(--text-muted); width: 45px; text-align: right; }
+
+  /* 输入区 */
+  .input-area {
+    padding: 16px 28px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .input-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .toolbar-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .toolbar-chip:hover { border-color: var(--border-bright); color: var(--text-primary); }
+  .toolbar-chip.active { border-color: rgba(56,139,253,0.4); background: rgba(56,139,253,0.08); color: var(--accent2); }
+
+  .input-box {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border-bright);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .input-box:focus-within { border-color: rgba(56,139,253,0.4); box-shadow: 0 0 0 3px rgba(56,139,253,0.06); }
+
+  .input-box textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 13.5px;
+    resize: none;
+    min-height: 22px;
+    max-height: 120px;
+    line-height: 1.6;
+  }
+  .input-box textarea::placeholder { color: var(--text-muted); }
+
+  .send-btn {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .send-btn:hover:not(:disabled) { transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .send-btn svg { width:16px;height:16px;fill:white; }
+
+  /* ── 右侧详情面板 ── */
+  .detail-panel {
+    width: 300px;
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title { font-size: 12.5px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 7px; }
+  .panel-title-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); }
+
+  .panel-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* 历史记录卡片列表 */
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .history-card {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .history-card:hover {
+    border-color: var(--accent2);
+  }
+
+  /* 分派决策卡 */
+  .dispatch-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .dispatch-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg2);
+  }
+
+  .dispatch-body { padding: 12px; }
+
+  .dispatch-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dispatch-row:last-child { border-bottom: none; }
+  .dispatch-key { color: var(--text-secondary); }
+  .dispatch-val { color: var(--text-primary); font-weight: 500; font-family: 'JetBrains Mono', monospace; }
+  .dispatch-val.highlight { color: var(--accent2); }
+
+  .ahp-chart { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .ahp-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  .ahp-label { width: 24px; color: var(--text-secondary); }
+  .ahp-track { flex: 1; height: 6px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+  .ahp-val { width: 32px; text-align: right; color: var(--text-primary); }
+  
+  .confidence-tag { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+  .conf-high { background: rgba(46,160,67,0.15); color: var(--accent); }
+  .conf-mid { background: rgba(210,153,34,0.15); color: var(--accent3); }
+  .conf-low { background: rgba(248,81,73,0.15); color: var(--red); }
+
+  /* RTSM 指标 */
+  .rtsm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 0; }
+  .rtsm-item { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; cursor: help; }
+  .rtsm-ring {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3);
+  }
+  .rtsm-ring::before { content: ''; position: absolute; inset: 4px; background: var(--bg3); border-radius: 50%; z-index: 1; }
+  .rtsm-val { position: relative; z-index: 2; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+  .rtsm-label { font-size: 10px; color: var(--text-muted); }
+
+  /* 绩效迷你图 */
+  .perf-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: opacity 0.3s;
+  }
+  .perf-icon { font-size: 16px; width: 28px; text-align: center; }
+  .perf-info { flex: 1; min-width: 0; }
+  .perf-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+  .perf-type { font-size: 10.5px; color: var(--text-muted); }
+  .sparkline { width: 60px; height: 20px; }
+  .sparkline path { fill: none; stroke: var(--accent2); stroke-width: 1.5; stroke-linecap: round; }
+
+  /* 质量评分弹窗 */
+  .quality-popup {
+    position: fixed;
+    bottom: 80px; right: 24px;
+    width: 300px;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-top: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 9999;
+  }
+  .popup-enter-active, .popup-leave-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .popup-enter-from, .popup-leave-to { opacity: 0; transform: translateY(20px) scale(0.92); }
+  .qp-popup-label { font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .qp-popup-label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 1.5s infinite; }
+
+  .qp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .qp-score { font-size: 32px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+  .qp-eng { text-align: right; }
+  .qp-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .qp-reason { font-size: 12px; color: var(--text-secondary); background: rgba(46,160,67,0.08); padding: 8px; border-radius: 6px; margin-bottom: 12px; }
+  .qp-dims { display: flex; flex-direction: column; gap: 6px; }
+  .qp-dim { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  .qp-dim-track { flex: 1; height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+  .qp-dim-fill { height: 100%; background: var(--accent2); border-radius: 2px; }
+
+  /* 内嵌错误卡片 */
+  .error-card { display:flex; gap:10px; align-items:flex-start; padding:10px 14px; margin:6px 0;
+    background:rgba(207,34,46,0.08); border:1px solid rgba(207,34,46,0.25);
+    border-left:3px solid var(--red); border-radius:8px; }
+  .err-icon { font-size:14px; margin-top:2px; }
+  .err-title { font-size:13px; font-weight:500; color:var(--red); margin-bottom:3px; }
+  .err-detail { font-size:11px; color:var(--text-secondary); font-family:monospace; word-break:break-all; }
+  .err-hint { font-size:11px; color:var(--text-muted); margin-top:3px; }
+
+  .panel-tabs { display: flex; border-top: 1px solid var(--border); }
+  .panel-tab { flex: 1; padding: 10px; text-align: center; font-size: 11.5px; color: var(--text-muted); cursor: pointer; border: none; background: transparent; transition: all 0.2s; border-top: 2px solid transparent; }
+  .panel-tab.active { color: var(--accent2); border-top-color: var(--accent2); background: rgba(56,139,253,0.05); }
+  .panel-tab:hover:not(.active) { color: var(--text-secondary); background: rgba(31,35,40,0.03); }
+  .panel-tab.active { color: var(--accent2); border-top-color: var(--accent2); background: rgba(9,105,218,0.04); }
+
+  .mode-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 10.5px; font-weight: 600; margin-right: 4px; }
+  .mode-badge.edu { background: rgba(130,80,223,0.1); color: var(--purple); }
+  .mode-badge.code { background: rgba(9,105,218,0.1); color: var(--accent2); }
+
+  .markdown-body { font-size: 13.5px; line-height: 1.6; color: var(--text-primary); }
+  .markdown-body p { margin-bottom: 0.8em; }
+  .markdown-body pre { background: var(--bg2); border: 1px solid var(--border-bright); border-radius: 8px; padding: 12px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; }
+
+  /* ══════════════════════════════════════════
+     登录 / 注册 模态框
+  ══════════════════════════════════════════ */
+  .auth-overlay {
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+  }
+  .auth-card {
+    width: 400px;
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    border-radius: 18px;
+    padding: 36px 32px 28px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.1);
+    position: relative;
+    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .auth-logo {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 28px;
+  }
+  .auth-logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 16px rgba(46,160,67,0.3);
+  }
+  .auth-logo-text { font-family: 'Noto Serif SC',serif; font-size: 18px; font-weight: 700; color: var(--text-primary); }
+  .auth-logo-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .auth-tabs {
+    display: flex; gap: 0;
+    background: var(--bg3);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .auth-tab {
+    flex: 1; padding: 8px; text-align: center;
+    border-radius: 7px; border: none;
+    background: transparent; color: var(--text-secondary);
+    font-size: 13px; font-family: 'Noto Sans SC',sans-serif;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .auth-tab.active {
+    background: var(--bg2); color: var(--text-primary);
+    font-weight: 600; box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+  }
+  .auth-field { margin-bottom: 14px; }
+  .auth-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+  .auth-input {
+    width: 100%; padding: 10px 14px;
+    background: var(--bg3); border: 1px solid var(--border-bright);
+    border-radius: 9px; color: var(--text-primary);
+    font-size: 13.5px; font-family: 'Noto Sans SC',sans-serif;
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+  .auth-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(56,139,253,0.1); }
+  .auth-input::placeholder { color: var(--text-muted); }
+  .auth-btn {
+    width: 100%; padding: 11px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 9px;
+    color: white; font-size: 14px; font-weight: 600;
+    font-family: 'Noto Sans SC',sans-serif;
+    cursor: pointer; margin-top: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(46,160,67,0.3);
+  }
+  .auth-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.1); box-shadow: 0 6px 20px rgba(46,160,67,0.4); }
+  .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .auth-error {
+    background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3);
+    border-radius: 8px; padding: 9px 12px;
+    font-size: 12.5px; color: var(--red); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .auth-success {
+    background: rgba(46,160,67,0.1); border: 1px solid rgba(46,160,67,0.3);
+    border-radius: 8px; padding: 9px 12px;
+    font-size: 12.5px; color: var(--accent); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .auth-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 16px 0; color: var(--text-muted); font-size: 12px;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  /* 顶部用户信息区 */
+  .user-info-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 10px 4px 4px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 20px; cursor: pointer; transition: all 0.2s;
+    position: relative;
+  }
+  .user-info-btn:hover { border-color: var(--border-bright); background: var(--bg2); }
+  .user-avatar-img {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, #0969DA, #8250DF);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; color: var(--text-primary); font-weight: 500; max-width: 80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--bg); border: 1px solid var(--border-bright);
+    border-radius: 10px; padding: 6px; min-width: 140px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 500;
+    animation: fadeIn 0.15s ease;
+  }
+  .dropdown-item {
+    padding: 8px 12px; border-radius: 7px; cursor: pointer;
+    font-size: 12.5px; color: var(--text-secondary);
+    transition: all 0.15s; display: flex; align-items: center; gap: 8px;
+  }
+  .dropdown-item:hover { background: var(--bg2); color: var(--text-primary); }
+  .dropdown-item.danger:hover { background: rgba(248,81,73,0.1); color: var(--red); }
+  .dropdown-sep { height: 1px; background: var(--border); margin: 4px 0; }
+  /* 登录态下avatar显示首字母 */
+  .avatar-letter { font-size: 13px; font-weight: 700; }
+
+</style>
+</head>
+<body>
+<div id="app" style="height: 100%; display: flex; flex-direction: column;">
+
+  <!-- ══ 登录 / 注册 模态框 ══ -->
+  <div class="auth-overlay" v-if="!currentUser">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🎓</div>
+        <div>
+          <div class="auth-logo-text">EduCode AI</div>
+          <div class="auth-logo-sub">编程教学辅助平台</div>
+        </div>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab" :class="{ active: authMode === 'login' }" @click="authMode='login'; authError=''; authSuccess=''">登 录</button>
+        <button class="auth-tab" :class="{ active: authMode === 'register' }" @click="authMode='register'; authError=''; authSuccess=''">注 册</button>
+      </div>
+
+      <div class="auth-error" v-if="authError">⚠️ {{ authError }}</div>
+      <div class="auth-success" v-if="authSuccess">✅ {{ authSuccess }}</div>
+
+      <!-- 登录表单 -->
+      <template v-if="authMode === 'login'">
+        <div class="auth-field">
+          <label class="auth-label">用户名 / 邮箱</label>
+          <input class="auth-input" v-model="authForm.username" placeholder="请输入用户名" @keydown.enter="doAuth" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">密码</label>
+          <input class="auth-input" type="password" v-model="authForm.password" placeholder="请输入密码" @keydown.enter="doAuth" />
+        </div>
+        <button class="auth-btn" @click="doAuth" :disabled="authLoading">
+          {{ authLoading ? '登录中...' : '立即登录' }}
+        </button>
+        <div class="auth-divider">快速体验</div>
+        <button class="auth-btn" style="background:var(--bg3);color:var(--text-secondary);border:1px solid var(--border);box-shadow:none;" @click="guestLogin">
+          👤 游客模式进入
+        </button>
+      </template>
+
+      <!-- 注册表单 -->
+      <template v-if="authMode === 'register'">
+        <div class="auth-field">
+          <label class="auth-label">用户名</label>
+          <input class="auth-input" v-model="authForm.username" placeholder="4-16位字母、数字或下划线" @keydown.enter="doAuth" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">邮箱（可选）</label>
+          <input class="auth-input" v-model="authForm.email" placeholder="用于找回密码" @keydown.enter="doAuth" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">密码</label>
+          <input class="auth-input" type="password" v-model="authForm.password" placeholder="至少6位" @keydown.enter="doAuth" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">确认密码</label>
+          <input class="auth-input" type="password" v-model="authForm.confirm" placeholder="再次输入密码" @keydown.enter="doAuth" />
+        </div>
+        <button class="auth-btn" @click="doAuth" :disabled="authLoading">
+          {{ authLoading ? '注册中...' : '创建账号' }}
+        </button>
+      </template>
+    </div>
+  </div>
+
+
+  <!-- Quality Popup（右下角浮窗，生成完成后5秒自动消失） -->
+  <transition name="popup">
+    <div class="quality-popup" v-if="showQualityPopup">
+      <div class="qp-popup-label">📊 质量评分完成</div>
+      <div class="qp-header">
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <div class="qp-score" :style="{color: qualityData.score>=8?'var(--accent)':qualityData.score>=6?'var(--accent3)':'var(--red)'}">
+            {{ qualityData.score }}
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);">/ 10</div>
+        </div>
+        <div class="qp-eng">
+          <div class="qp-name">{{ qualityData.engineer }}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">点击「历史记录」查看详情</div>
+        </div>
+      </div>
+      <div class="qp-reason">{{ qualityData.reason }}</div>
+      <div class="qp-dims" v-if="qualityData.dimensions">
+        <div class="qp-dim" v-for="([label, key]) in [['注释质量','comment'],['代码结构','structure'],['难度匹配','difficulty'],['内容完整','completeness']]" :key="key">
+          <div style="width:52px;font-size:10px;color:var(--text-muted);">{{ label }}</div>
+          <div class="qp-dim-track">
+            <div class="qp-dim-fill" :style="{
+              width: ((qualityData.dimensions[key]||0) * 10) + '%',
+              background: (qualityData.dimensions[key]||0)>=8?'var(--accent)':(qualityData.dimensions[key]||0)>=6?'var(--accent3)':'var(--red)',
+              transition: 'width 0.6s ease'
+            }"></div>
+          </div>
+          <div style="width:18px;text-align:right;font-size:10px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">
+            {{ qualityData.dimensions[key] || 0 }}
+          </div>
+        </div>
+      </div>
+      <!-- 快速跳转按钮 -->
+      <button @click="currentTab='quality'; showQualityPopup=false"
+        style="width:100%;margin-top:10px;padding:6px;background:rgba(46,160,67,0.1);border:1px solid rgba(46,160,67,0.3);border-radius:6px;color:var(--accent);font-size:11px;cursor:pointer;">
+        查看完整历史记录 →
+      </button>
+    </div>
+  </transition>
+
+  <!-- 顶部导航（已登录才显示）-->
+  <template v-if="currentUser">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo-icon">🎓</div>
+      <div class="logo-text">EduCode AI</div>
+      <div class="logo-sub">编程教学辅助平台</div>
+    </div>
+
+    <div class="topbar-tabs">
+      <button class="tab-btn" :class="{ active: currentMode === 'normal' }" @click="currentMode = 'normal'">普通模式</button>
+      <button class="tab-btn" :class="{ active: currentMode === 'advanced' }" @click="currentMode = 'advanced'">进阶模式</button>
+    </div>
+
+    <div class="topbar-right">
+      <div class="topbar-badge" v-if="loading">
+        <div class="dot-green"></div>
+        多智能体协作中
+      </div>
+      <!-- 用户信息 / 下拉菜单 -->
+      <div class="user-info-btn" @click="showUserMenu = !showUserMenu" v-if="currentUser">
+        <div class="user-avatar-img">
+          <span class="avatar-letter">{{ currentUser.username[0].toUpperCase() }}</span>
+        </div>
+        <div class="user-name">{{ currentUser.username }}</div>
+        <svg style="width:10px;height:10px;fill:var(--text-muted);transition:transform 0.2s;" :style="showUserMenu?'transform:rotate(180deg)':''" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+        <!-- 下拉菜单 -->
+        <div class="user-dropdown" v-if="showUserMenu" @click.stop>
+          <div class="dropdown-item" style="color:var(--text-muted);font-size:11px;padding-bottom:4px;">
+            {{ currentUser.isGuest ? '🎭 游客模式' : '👤 ' + currentUser.username }}
+          </div>
+          <div class="dropdown-sep"></div>
+          <div class="dropdown-item" @click="showUserMenu=false; authMode='register'; currentUser=null" v-if="currentUser.isGuest">
+            📝 注册账号
+          </div>
+          <div class="dropdown-item" @click="showUserMenu=false">⚙️ 设置</div>
+          <div class="dropdown-sep"></div>
+          <div class="dropdown-item danger" @click="logout">🚪 退出登录</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- 左侧边栏 -->
+    <div class="sidebar" :class="{ collapsed: currentMode === 'normal' }">
+      <div class="sidebar-section">
+        <div class="sidebar-label">教学参数</div>
+        <div class="setting-row">
+          <label>目标受众</label>
+          <select class="setting-select" v-model="settings.audience">
+            <option>大学一年级 · 编程入门</option>
+            <option>大学二年级 · 进阶</option>
+            <option>高中生 · 竞赛</option>
+            <option>研究生 · 算法</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label>编程语言</label>
+          <select class="setting-select" v-model="settings.language" @change="onLanguageChange">
+            <option>Python 3.x</option>
+            <option>Java</option>
+            <option>C / C++</option>
+            <option>JavaScript</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label>知识点领域</label>
+          <select class="setting-select" v-model="settings.domain" @change="loadPerformanceData">
+            <option>数据结构与算法</option>
+            <option>Web 前后端开发</option>
+            <option>机器学习基础</option>
+            <option>数据分析</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 智能体团队区块 [DONE: 恢复并修复] -->
+      <div class="sidebar-section" style="flex:1;overflow-y:auto;border-bottom:none;">
+        <div class="sidebar-label">智能体团队</div>
+        <div class="agent-list">
+          <div class="agent-item" v-for="agent in engineers" :key="agent.id" :class="{ active: agent.active }" :data-engineer-id="agent.id">
+            <div class="agent-avatar" :class="getAgentClass(agent.role)">
+              {{ getAgentIcon(agent.role) }}
+              <div class="agent-status" :class="agent.status"></div>
+            </div>
+            <div class="agent-info">
+              <div class="agent-name">{{ agent.role }}</div>
+              <div class="agent-role">
+                <span class="agent-tag" :class="getTagClass(agent.role)">{{ getTagLabel(agent.role) }}·{{ agent.name }}</span> 
+              </div>
+            </div>
+            <div class="agent-score">
+              <div v-if="agent.status === 'busy'" class="agent-progress">
+                <div class="progress-val">{{ agent.progress || 0 }}%</div>
+                <div class="score-label">进度</div>
+              </div>
+              <template v-else>
+                <div class="score-val">{{ agent.score?.toFixed(1) || '9.0' }}</div>
+                <div class="score-label">绩效</div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:14px;border-top:1px solid var(--border);">
+        <div class="sidebar-label" style="margin-bottom:8px;">本轮统计</div>
+        <div class="stats-grid">
+          <div class="stat-card" :class="{ 'highlight-pulse': statsChanged.generated }">
+            <div class="stat-num" style="background:linear-gradient(135deg,#1F883D,#0969DA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">{{ roundStats.generated }}</div>
+            <div class="stat-desc">已生成文件</div>
+          </div>
+          <div class="stat-card" :class="{ 'highlight-pulse': statsChanged.quality }">
+            <div class="stat-num" style="background:linear-gradient(135deg,#8250DF,#0969DA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">{{ avgQuality }}</div>
+            <div class="stat-desc">代码质量均分</div>
+          </div>
+          <div class="stat-card" :class="{ 'highlight-pulse': statsChanged.parallel }">
+            <div class="stat-num" style="background:linear-gradient(135deg,#9A6700,#CF222E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+              {{ currentUser?.isGuest ? roundStats.tasksDone : (getUsers()[currentUser?.username.toLowerCase()]?.totalTasks || roundStats.tasksDone) }}
+            </div>
+            <div class="stat-desc">完成任务</div>
+          </div>
+          <div class="stat-card" :class="{ 'highlight-pulse': statsChanged.performance }">
+            <div class="stat-num" style="background:linear-gradient(135deg,#1A7F37,#1F883D);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">{{ avgPerfScore }}</div>
+            <div class="stat-desc">平均绩效</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="new-session-btn" @click="resetSession">＋ 新建教学会话</button>
+      </div>
+    </div>
+
+    <!-- 中间聊天区 -->
+    <div class="chat-area">
+      <div class="messages" id="messages" ref="messagesContainer">
+        <div class="welcome-screen" v-if="messages.length === 0">
+          <div class="welcome-hero">
+            <div class="welcome-icon">🎓</div>
+            <div class="welcome-title">EduCode AI 教学助手</div>
+            <div class="welcome-sub">基于多智能体协作与 RTSM 共生进化引擎，生成高质量教学内容。</div>
+          </div>
+          <div class="quick-cards">
+            <div class="quick-card" v-for="tag in quickTags" :key="tag.label" @click="useQuickTag(tag)">
+              <div class="qc-icon">{{ tag.icon }}</div>
+              <div class="qc-title">{{ tag.label }}</div>
+              <div class="qc-desc">{{ tag.desc }}</div>
+            </div>
+          </div>
+        </div>
+
+        <template v-for="(msg, index) in messages" :key="index">
+          <div class="msg-row" :class="msg.role === 'user' ? 'user' : 'bot'">
+            <div class="msg-avatar" :class="msg.role === 'user' ? 'user-av' : 'bot-av'">{{ msg.role === 'user' ? '👤' : '🤖' }}</div>
+            <div class="msg-content">
+              <div class="msg-meta">
+                <span class="msg-sender">{{ msg.role === 'user' ? '教师' : 'EduCode AI' }}</span>
+                <span>{{ msg.time }}</span>
+              </div>
+              <div class="msg-bubble">
+                <div class="markdown-body" v-html="renderMarkdown(msg.content)"></div>
+                
+                <div class="flow-steps" v-if="msg.steps && msg.steps.length > 0">
+                  <div class="flow-step" v-for="step in msg.steps" :key="step.id" :class="step.status">
+                    <div class="step-icon" :class="step.status">
+                      <div v-if="step.status === 'running'" class="spinner"></div>
+                      <span v-else>✓</span>
+                    </div>
+                    <div class="step-body">
+                      <div class="step-title">{{ step.title }}</div>
+                      <div class="step-detail">{{ step.description }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 步骤卡片容器 — 流式期间动态填充，历史消息中隐藏空容器 -->
+                <div class="step-container" style="display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+
+                <!-- 流式正文容器 — 历史消息内容已通过 msg.content 渲染，此处保留空节点供流式写入 -->
+                <div class="stream-content-container markdown-body" style="display:none;"></div>
+
+                <div v-if="msg.files && msg.files.length > 0" style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+                  <div class="code-preview" v-for="file in msg.files" :key="file.filename">
+                    <div class="code-header" @click="file.expanded = !file.expanded">
+                      <div class="code-title">
+                        <svg class="arrow-icon" :class="{ expanded: file.expanded }" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        <span>📄 {{ file.filename }}</span>
+                      </div>
+                      <div class="code-copy" @click.stop="copyCode(file.content, $event)">复制</div>
+                    </div>
+                    <div class="code-body" :class="{ expanded: file.expanded }">
+                      <pre><code :class="'language-' + file.language" v-html="highlightCode(file.content, file.language)"></code></pre>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="finish-card" v-if="msg.finishData">
+                  <div class="finish-title">✅ 生成完成</div>
+                  <div class="finish-info">共生成 {{ msg.finishData.file_count }} 个文件 · {{ msg.finishData.project_name }}</div>
+                  <div class="finish-actions">
+                    <button class="btn-primary" @click="downloadProject(msg.finishData)">📦 打包下载</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <div class="msg-row bot" v-if="loading">
+          <div class="msg-avatar bot-av">🤖</div>
+          <div class="msg-content">
+            <div class="msg-meta">
+              <span class="msg-sender">EduCode AI</span>
+            </div>
+            <div class="msg-bubble">
+              <div class="step-container" style="display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+              <div class="stream-content-container markdown-body stream-content" style="display:block;min-height:4px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-toolbar">
+          <div class="toolbar-chip" v-for="tag in quickTags" :key="tag.label" :class="{ active: activeTag === tag.label }" @click="useQuickTag(tag)">
+            {{ tag.icon }} {{ tag.label }}
+          </div>
+        </div>
+        <div class="input-box">
+          <textarea v-model="input" :placeholder="inputPlaceholder" @keydown.enter.exact.prevent="sendMessage" :disabled="loading"></textarea>
+          <button class="send-btn" @click="sendMessage" :disabled="loading || !input.trim()">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧详情面板 -->
+    <div class="detail-panel" :style="{ display: currentMode === 'advanced' ? 'flex' : 'none' }">
+      <div class="panel-header">
+        <div class="panel-title"><div class="panel-title-dot"></div>分派决策详情</div>
+        <div style="font-size:11px;color:var(--text-muted);cursor:pointer;" @click="loadPerformanceData">刷新</div>
+      </div>
+      <div class="panel-scroll">
+
+        <!-- ── 分派详情 Tab ── -->
+        <template v-if="currentTab === 'dispatch'">
+          <div class="dispatch-card">
+            <div class="dispatch-header" style="display:flex;justify-content:space-between;">
+              <span>AHP 分派结果</span>
+              <span class="confidence-tag" :class="getConfidenceClass(ahpData.confidence)">{{ { high: 'HIGH', medium: 'MID', low: 'LOW' }[ahpData.confidence] || 'HIGH' }} 信心</span>
+            </div>
+            <div class="dispatch-body">
+              <div class="dispatch-row"><span class="dispatch-key">执行模式</span><span class="dispatch-val highlight">{{ parallelTasks.active ? '并行协作' : '单体执行' }}</span></div>
+              <div v-if="ahpData.hasData" class="ahp-chart" style="margin-top:8px;">
+                <div class="ahp-bar-row" v-for="(score, role) in ahpData.scores" :key="role">
+                  <div class="ahp-label" style="width:40px;font-size:10px;color:var(--text-secondary);">{{ { '代码示例工程师':'RD','可视化设计工程师':'UI','习题设计工程师':'PK' }[role] || role }}</div>
+                  <div class="ahp-track"><div class="p-fill" :style="{ width: Math.min(100, score * 200) + '%' }"></div></div>
+                  <div class="ahp-val">{{ score.toFixed(2) }}</div>
+                </div>
+              </div>
+              <div v-else style="text-align:center;padding:14px 0;color:var(--text-muted);font-size:11px;">发送任务后显示分派结果</div>
+            </div>
+          </div>
+
+          <div class="dispatch-card">
+            <div class="dispatch-header">RTSM 指标</div>
+            <div class="dispatch-body">
+              <div class="rtsm-grid">
+                <div class="rtsm-item" v-for="(label, key) in { EEP: '拓展', TQG: '质量', SS: '共生' }" :key="key">
+                  <div class="rtsm-ring" :style="{ background: rtsmGradient(ahpData.metrics[key], '#0969DA') }">
+                    <div class="rtsm-val">{{ ahpData.metrics[key]?.toFixed(2) || '0.00' }}</div>
+                  </div>
+                  <div class="rtsm-label">{{ label }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="parallel-section" v-if="parallelTasks.active">
+            <div class="parallel-header"><span>并行进度</span><span>{{ parallelTasks.time }}ms</span></div>
+            <div class="parallel-item" v-for="task in parallelTasks.tasks" :key="task.id">
+              <div class="p-name">{{ task.engineer }}</div>
+              <div class="p-track"><div class="p-fill" :style="{ width: task.progress + '%' }"></div></div>
+              <div class="p-status">{{ task.status }}</div>
+            </div>
+          </div>
+
+          <div class="dispatch-card">
+            <div class="dispatch-header">历史绩效趋势</div>
+            <div class="dispatch-body" style="display:flex;flex-direction:column;gap:8px;">
+              <div v-if="!hasPerformance" style="text-align:center;padding:14px;color:var(--text-muted);font-size:11px;">暂无历史记录</div>
+              <div class="perf-card" v-for="(stat, role) in performanceStats" :key="role">
+                <div class="perf-icon">{{ getRoleIcon(role) }}</div>
+                <div class="perf-info">
+                  <div class="perf-name">{{ getRoleName(role) }}</div>
+                  <div class="perf-type">Avg {{ stat.avg_score?.toFixed(1) ?? '—' }}</div>
+                </div>
+                <svg class="sparkline" viewBox="0 0 100 20"><path :d="sparklinePath(stat.recent_trend)"></path></svg>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- ── 历史记录 Tab ── -->
+        <template v-if="currentTab === 'quality'">
+          <!-- 空状态 -->
+          <div v-if="qualityHistory.length === 0" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:12px;">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="20" stroke="rgba(31,35,40,0.08)" stroke-width="2"/>
+              <path d="M12 18h20M12 24h12M12 30h20" stroke="rgba(9,105,218,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div style="font-size:12px;color:var(--text-muted);text-align:center;line-height:1.7;">暂无生成记录<br/>生成的项目记录将显示在此处</div>
+          </div>
+          <!-- 有数据 -->
+          <template v-else>
+            <!-- 汇总行 -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px 10px;border-bottom:1px solid var(--border);">
+              <div style="font-size:11px;color:var(--text-muted);">共 {{ qualityHistory.length }} 条记录</div>
+              <div style="display:flex;align-items:baseline;gap:4px;">
+                <span style="font-size:11px;color:var(--text-muted);">平均质量</span>
+                <span style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent);">{{ avgQuality }}</span>
+              </div>
+            </div>
+            <!-- 记录卡片列表 -->
+            <div class="history-list">
+              <div v-for="(q, i) in qualityHistory" :key="i"
+                @click="loadHistoryDetail(q)"
+                class="history-card">
+                <!-- 需求标题 -->
+                <div style="padding:10px 12px;background:var(--bg2);font-size:11.5px;font-weight:600;color:var(--text-primary);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <span style="color:var(--accent2);">#</span> {{ q.requirement?.slice(0, 30) }}{{ (q.requirement?.length > 30) ? '...' : '' }}
+                  </div>
+                  <svg v-if="q.session_id" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                </div>
+                <!-- 详情头 -->
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:11px;font-weight:500;color:var(--text-secondary);">{{ q.engineer }}</span>
+                    <span style="font-size:10px;color:var(--text-muted);background:rgba(31,35,40,0.05);padding:1px 6px;border-radius:3px;">{{ q.task_type }}</span>
+                  </div>
+                  <!-- 评分徽章 -->
+                  <div style="font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;" :style="{color: q.score>=8?'#1F883D':q.score>=6?'#9A6700':'#CF222E'}">
+                    {{ q.score.toFixed(1) }}
+                  </div>
+                </div>
+                <!-- 评价理由 -->
+                <div style="padding:8px 12px;font-size:11px;color:var(--text-secondary);line-height:1.5;background:var(--bg);">{{ q.reason }}</div>
+                <!-- 时间戳 -->
+                <div style="padding:4px 12px 8px;font-size:9.5px;color:var(--text-muted);text-align:right;">{{ new Date(q.timestamp).toLocaleString() }}</div>
+              </div>
+            </div>
+          </template>
+        </template>
+
+      </div>
+      <div class="panel-tabs">
+        <button class="panel-tab" :class="{ active: currentTab === 'dispatch' }" @click="currentTab = 'dispatch'">分派详情</button>
+        <button class="panel-tab" :class="{ active: currentTab === 'quality' }" @click="currentTab = 'quality'">历史记录</button>
+      </div>
+    </div>
+  </div>
+  </template><!-- /v-if currentUser -->
+</div>
+
+<script>
+  const { createApp, ref, reactive, onMounted, nextTick, computed, watch } = Vue;
+
+  createApp({
+    setup() {
+      localStorage.removeItem('educode_current_user');
+      // ══ 登录 / 注册 状态 ══
+      const currentUser = ref(null);       // { username, isGuest }
+      const authMode = ref('login');        // 'login' | 'register'
+      const authLoading = ref(false);
+      const authError = ref('');
+      const authSuccess = ref('');
+      const showUserMenu = ref(false);
+      const authForm = reactive({ username: '', password: '', confirm: '', email: '' });
+
+      // 本地用户存储（模拟后端，数据存 localStorage）
+      const getUsers = () => { try { return JSON.parse(localStorage.getItem('educode_users') || '{}'); } catch { return {}; } };
+      const saveUsers = (u) => localStorage.setItem('educode_users', JSON.stringify(u));
+
+      // 检查是否已登录（页面刷新后恢复登录态）
+      const savedUser = localStorage.getItem('educode_current_user');
+      if (savedUser) { try { currentUser.value = JSON.parse(savedUser); } catch {} }
+
+      // 关闭下拉菜单（点击其他地方）
+      document.addEventListener('click', () => { showUserMenu.value = false; });
+
+      const doAuth = async () => {
+        authError.value = '';
+        authSuccess.value = '';
+        if (!authForm.username.trim()) { authError.value = '请输入用户名'; return; }
+        if (!authForm.password) { authError.value = '请输入密码'; return; }
+
+        authLoading.value = true;
+        await new Promise(r => setTimeout(r, 400)); // 模拟网络延迟
+
+        const users = getUsers();
+
+        if (authMode.value === 'login') {
+          const u = users[authForm.username.toLowerCase()];
+          if (!u) { authError.value = '用户名不存在，请先注册'; authLoading.value = false; return; }
+          if (u.password !== btoa(authForm.password)) { authError.value = '密码错误'; authLoading.value = false; return; }
+          currentUser.value = { username: authForm.username, isGuest: false };
+          localStorage.setItem('educode_current_user', JSON.stringify(currentUser.value));
+        } else {
+          // 注册
+          if (authForm.username.length < 2 || authForm.username.length > 20) { authError.value = '用户名需 2-20 位'; authLoading.value = false; return; }
+          if (!/^[a-zA-Z0-9_一-龥]+$/.test(authForm.username)) { authError.value = '用户名只能含字母、数字、下划线或中文'; authLoading.value = false; return; }
+          if (authForm.password.length < 6) { authError.value = '密码至少 6 位'; authLoading.value = false; return; }
+          if (authForm.password !== authForm.confirm) { authError.value = '两次密码不一致'; authLoading.value = false; return; }
+          if (users[authForm.username.toLowerCase()]) { authError.value = '该用户名已被注册'; authLoading.value = false; return; }
+          users[authForm.username.toLowerCase()] = { username: authForm.username, password: btoa(authForm.password), email: authForm.email, createdAt: Date.now() };
+          saveUsers(users);
+          authSuccess.value = '注册成功！正在自动登录...';
+          await new Promise(r => setTimeout(r, 800));
+          currentUser.value = { username: authForm.username, isGuest: false };
+          localStorage.setItem('educode_current_user', JSON.stringify(currentUser.value));
+        }
+        authLoading.value = false;
+        authForm.username = ''; authForm.password = ''; authForm.confirm = ''; authForm.email = '';
+      };
+
+      const guestLogin = () => {
+        currentUser.value = { username: '游客_' + Math.random().toString(36).slice(2,6).toUpperCase(), isGuest: true };
+        // 游客不持久化
+      };
+
+      const logout = () => {
+        currentUser.value = null;
+        showUserMenu.value = false;
+        localStorage.removeItem('educode_current_user');
+        authForm.username = ''; authForm.password = ''; authForm.confirm = ''; authForm.email = '';
+        authError.value = ''; authSuccess.value = '';
+        authMode.value = 'login';
+      };
+      // ══ 登录结束 ══
+
+      const currentMode = ref('advanced');
+      const messages = ref([]);
+      const input = ref('');
+      const loading = ref(false);
+      const currentStreamContent = ref('');
+      const currentSteps = ref([]);
+      const currentFiles = ref([]);
+      const currentFinishData = ref(null);
+      const engineers = ref([
+        { id: 'RD', name: 'Alice', role: '代码示例工程师', score: 0.0, status: 'online', active: false, progress: 0 },
+        { id: 'UI', name: 'Bob', role: '可视化设计工程师', score: 0.0, status: 'online', active: false, progress: 0 },
+        { id: 'PK', name: 'Charlie', role: '习题设计工程师', score: 0.0, status: 'online', active: false, progress: 0 }
+      ]);
+      const settings = reactive({ audience: '大学一年级 · 编程入门', language: 'Python 3.x', domain: '数据结构与算法' });
+      const messagesContainer = ref(null);
+      const activeTag = ref('');
+
+      // SSE 状态管理 [DONE: 修复二 2.2 / 2.4]
+      let contentBuffer = '';
+      let currentAIBubble = null;
+      let contentElement = null;
+      let stepContainer = null;
+
+      const roundStats = reactive({ generated: 0, qualityScores: [], parallelTasks: 0, tasksDone: 0 });
+      const statsChanged = reactive({ generated: false, quality: false, parallel: false, performance: false });
+
+      const parallelTasks = reactive({ active: false, tasks: {}, time: 0 });
+      const ahpData = reactive({ scores: {}, metrics: { EEP: 0, TQG: 0, SS: 0 }, confidence: 'high', hasData: false });
+      const performanceStats = ref({});
+      const currentTab = ref('dispatch');
+      const showQualityPopup = ref(false);
+      const qualityData = reactive({ score: 0, engineer: '', reason: '', dimensions: null });
+      const qualityHistory = ref([]);  // 质量报告历史记录
+
+      const quickTags = [
+        { label: '教学示例', icon: '📚', desc: '生成分级难度代码示例', template: '请为{language}生成关于{domain}的教学示例代码（{audience}水平），每行加详细中文注释，涵盖初级到高级三个难度层次' },
+        { label: '生成习题', icon: '🧪', desc: '设计课后练习与答案', template: '请出4道关于{domain}的{language}练习题（{audience}水平），包含标准答案和常见错误提示' },
+        { label: '图解可视化', icon: '🎨', desc: '生成算法流程图示', template: '请为{domain}画一个算法流程图或数据结构示意图，适合{audience}理解' },
+        { label: '教案文档', icon: '📝', desc: '完整教学大纲与讲解', template: '请生成一份{domain}的完整教案（{audience}水平），包含学习目标、核心知识点讲解和课堂练习' }
+      ];
+
+      const inputPlaceholder = computed(() => `描述您的 ${settings.language} 教学需求...`);
+      const avgQuality = computed(() => {
+        // 优先显示最近一次生成的打分结果，如果没有则显示 0.0
+        if (!qualityHistory.value.length) return '0.0';
+        return qualityHistory.value[0].score.toFixed(1);
+      });
+      const avgPerfScore = computed(() => {
+        const vals = Object.values(performanceStats.value).map(s => s.avg_score).filter(v => v > 0);
+        if (!vals.length) return '0.0';
+        return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
+      });
+      const hasPerformance = computed(() => Object.keys(performanceStats.value).length > 0);
+
+      const fetchEngineers = async () => {
+        try {
+          const res = await fetch('/api/engineers');
+          const data = await res.json();
+          const list = data.available_engineers || [];
+          if (Array.isArray(list)) {
+            list.forEach(item => {
+              const eng = engineers.value.find(e => e.id === item.id || e.role.includes(item.profile.replace('Engineer','')));
+              if (eng) {
+                eng.name = item.name || eng.name;
+              }
+            });
+          }
+          // 同步数据库中的真实绩效均分
+          await loadPerformanceData();
+          engineers.value.forEach(eng => {
+            if (performanceStats.value[eng.id]) {
+              eng.score = performanceStats.value[eng.id].avg_score;
+            }
+          });
+        } catch (e) {
+          console.error("Fetch engineers failed, using defaults", e);
+        }
+      };
+
+      const loadPerformanceData = async () => {
+        try {
+          const res = await fetch('/api/performance');
+          performanceStats.value = await res.json();
+          // 实时同步到左侧团队列表
+          engineers.value.forEach(eng => {
+            if (performanceStats.value[eng.id]) {
+              eng.score = performanceStats.value[eng.id].avg_score;
+            }
+          });
+        } catch (e) { console.error(e); }
+      };
+
+      const fetchQualityHistory = async () => {
+        try {
+          const res = await fetch('/api/performance/history');
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            qualityHistory.value = data.map(item => ({
+              engineer: getRoleName(item.engineer_id),
+              engineer_id: item.engineer_id,
+              score: item.score,
+              reason: item.reason,
+              timestamp: item.timestamp,
+              task_type: item.task_type || '教学任务',
+              requirement: item.requirement || '未知需求',
+              session_id: item.session_id,
+              dimensions: item.dimensions
+            }));
+          }
+        } catch (e) { console.error("Fetch history failed", e); }
+      };
+
+      const loadHistoryDetail = async (historyItem) => {
+        if (!historyItem.session_id) {
+          alert("该历史记录没有关联的 Session ID，无法提取生成的代码");
+          return;
+        }
+
+        loading.value = true;
+        try {
+          // 1. 优先从数据库读取完整聊天历史
+          const chatRes = await fetch(`/api/chat/history/${historyItem.session_id}`);
+          if (chatRes.ok) {
+            const chatData = await chatRes.json();
+            if (chatData.messages && chatData.messages.length > 0) {
+              // 清空当前消息，加载完整历史
+              messages.value = chatData.messages.map(m => ({
+                role: m.role,
+                content: m.content,
+                steps: m.steps || [],
+                files: m.files || [],
+                finishData: m.finishData || { session_id: historyItem.session_id, file_count: m.files?.length || 0 },
+                time: m.time || ''
+              }));
+              nextTick(() => {
+                const chat = document.getElementById('chat-messages');
+                if (chat) chat.scrollTop = chat.scrollHeight;
+              });
+              loading.value = false;
+              return;
+            }
+          }
+
+          // 2. 兜底：只获取生成的文件（历史数据未保存时）
+          const res = await fetch(`/api/history/files/${historyItem.session_id}`);
+          const data = await res.json();
+          if (data.files && data.files.length > 0) {
+            messages.value.push({
+              role: 'assistant',
+              content: `已从历史记录中提取生成内容：\n\n**原始需求**: ${historyItem.requirement}\n**工程师**: ${historyItem.engineer}\n**质量评分**: ${historyItem.score.toFixed(1)}\n**评分理由**: ${historyItem.reason}`,
+              steps: [{ role: 'System', action: 'LoadHistory', content: '正在加载历史生成文件...', timestamp: new Date().toLocaleTimeString() }],
+              files: data.files.map(f => ({
+                filename: f.filename,
+                content: f.content,
+                language: f.language
+              })),
+              finishData: { file_count: data.files.length, session_id: historyItem.session_id },
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+            nextTick(() => {
+              const chat = document.getElementById('chat-messages');
+              if (chat) chat.scrollTop = chat.scrollHeight;
+            });
+          } else {
+            alert("未找到该会话生成的文件，可能已被清理或尚未生成。");
+          }
+        } catch (e) {
+          console.error("Load history detail failed", e);
+          alert("加载历史记录失败");
+        } finally {
+          loading.value = false;
+        }
+      };
+
+      watch(currentTab, (newTab) => {
+        if (newTab === 'quality') fetchQualityHistory();
+      });
+
+      const onLanguageChange = () => loadPerformanceData();
+
+      const triggerPulse = (key) => {
+        statsChanged[key] = true;
+        setTimeout(() => statsChanged[key] = false, 800);
+      };
+
+      const resetSession = () => {
+        messages.value = [];
+        currentStreamContent.value = '';
+        currentSteps.value = [];
+        currentFiles.value = [];
+        currentFinishData.value = null;
+        contentBuffer = '';
+        contentElement = null;
+        stepContainer = null;
+        qualityHistory.value = [];
+        Object.assign(roundStats, { generated: 0, qualityScores: [], parallelTasks: 0, tasksDone: 0 });
+        Object.assign(parallelTasks, { active: false, tasks: {}, time: 0 });
+        Object.assign(ahpData, { scores: {}, metrics: { EEP: 0, TQG: 0, SS: 0 }, confidence: 'high', hasData: false });
+        engineers.value.forEach(e => { e.active = false; e.status = 'online'; e.progress = 0; });
+        input.value = '';
+        loading.value = false;
+      };
+
+      const useQuickTag = (tag) => {
+        let text = tag.template
+          .replace('{language}', settings.language)
+          .replace('{domain}', settings.domain)
+          .replace('{audience}', settings.audience);
+        input.value = text;
+        activeTag.value = tag.label;
+        setTimeout(() => activeTag.value = '', 1500);
+        nextTick(() => document.querySelector('textarea').focus());
+      };
+
+      // 辅助渲染 Markdown 内容 [DONE: 修复二 2.2]
+      const updateMarkdown = (el, text) => {
+        el.innerHTML = marked.parse(text || '');
+        // 处理代码高亮
+        el.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+        scrollToBottom();
+      };
+
+      // 渲染步骤卡片 [DONE: 修复二 2.1]
+      const renderStepCard = (data) => {
+        if (!stepContainer) {
+          // 选最后一个 bot 气泡里的 step-container（即 loading 气泡）
+          const containers = document.querySelectorAll('.msg-row.bot .step-container');
+          stepContainer = containers[containers.length - 1] || null;
+        }
+        if (!stepContainer) return;
+
+        const icon = data.status === 'done' ? '✅' : data.status === 'error' ? '❌' : '⏳';
+        const existing = stepContainer.querySelector(`.step-card[data-action="${data.action}"]`);
+
+        const cardHtml = `
+          <div class="step-icon">${icon}</div>
+          <div class="step-info">
+            <div class="step-action">${[data.role, data.action].filter(Boolean).join(' · ')}</div>
+            <div class="step-desc">${data.desc || data.content || ''}</div>
+          </div>
+        `;
+
+        if (existing) {
+          existing.innerHTML = cardHtml;
+          existing.className = `step-card ${data.status}`;
+        } else {
+          const card = document.createElement('div');
+          card.className = `step-card ${data.status}`;
+          card.dataset.action = data.action;
+          card.innerHTML = cardHtml;
+          stepContainer.appendChild(card);
+        }
+        scrollToBottom();
+      };
+
+      const sendMessage = async () => {
+        if (!input.value.trim() || loading.value) return;
+        const query = input.value;
+        messages.value.push({ role: 'user', content: query, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+        input.value = '';
+        loading.value = true;
+        currentStreamContent.value = '';
+        contentBuffer = '';
+        contentElement = null;
+        stepContainer = null;
+
+        try {
+          const res = await fetch('/api/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requirement: query, ...settings })
+          });
+
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let partialLine = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = (partialLine + chunk).split('\n');
+            partialLine = lines.pop();
+
+            for (const line of lines) {
+              if (line.startsWith('event: ')) {
+                const eventName = line.slice(7).trim();
+                const nextLine = lines[lines.indexOf(line) + 1];
+                if (nextLine && nextLine.startsWith('data: ')) {
+                  const data = JSON.parse(nextLine.slice(6));
+                  handleEvent(eventName, data);
+                }
+              } else if (line.startsWith('data: ')) {
+                // 处理没有指定 event 的默认 message 事件
+                const data = JSON.parse(line.slice(6));
+                handleEvent('message', data);
+              }
+            }
+          }
+        } catch (e) {
+          console.error(e);
+          handleEvent('error', { content: e.message });
+        } finally {
+          loading.value = false;
+          if (contentElement) contentElement.classList.add('done');
+        }
+      };
+
+      const handleEvent = (event, data) => {
+        switch (event) {
+          case 'step':
+            renderStepCard(data);
+            break;
+          case 'dispatch_result':
+            Object.assign(ahpData, {
+              scores: data.ahp_scores || {},
+              metrics: data.rtsm_metrics || { EEP: 0, TQG: 0, SS: 0 },
+              confidence: data.dispatch_confidence || 'high',
+              hasData: true
+            });
+            engineers.value.forEach(e => { e.active = (e.id === data.engineer_id); if (e.active) e.status = 'busy'; });
+            break;
+          case 'parallel_start':
+            parallelTasks.active = true;
+            roundStats.parallelTasks = data.total_tasks;
+            triggerPulse('parallel');
+            data.task_ids.forEach(id => {
+              parallelTasks.tasks[id] = { id, engineer: '...', progress: 0, status: '运行中' };
+              const eng = engineers.value.find(e => e.id === id);
+              if (eng) eng.active = true;
+            });
+            break;
+          case 'task_progress':
+            if (parallelTasks.tasks[data.task_id]) {
+              parallelTasks.tasks[data.task_id].progress = data.progress;
+              parallelTasks.tasks[data.task_id].engineer = data.engineer;
+            }
+            const engBusy = engineers.value.find(e => e.id === data.task_id || e.id === data.engineer_id);
+            if (engBusy) {
+              engBusy.status = 'busy';
+              engBusy.progress = data.progress || 0;
+            }
+            break;
+          case 'task_complete':
+            if (parallelTasks.tasks[data.task_id]) parallelTasks.tasks[data.task_id].status = '已完成';
+            // 修复：不在这里单次增加，由最终的 finish 事件或 file_done 事件维护更准确
+            // roundStats.generated++;
+            triggerPulse('generated');
+            const engIdle = engineers.value.find(e => e.id === data.task_id || e.id === data.engineer_id);
+            if (engIdle) {
+              engIdle.status = 'online';
+              engIdle.active = false;
+              engIdle.progress = 0;
+            }
+            break;
+          case 'parallel_complete':
+            parallelTasks.time = data.total_time_ms;
+            engineers.value.forEach(e => { e.active = false; e.status = 'online'; e.progress = 0; });
+            break;
+          case 'quality_score': {
+            Object.assign(qualityData, data);
+            qualityData.engineer = getRoleName(data.engineer_id);
+            roundStats.qualityScores.push(data.score);
+            // 记入质量报告历史
+            qualityHistory.value.unshift({
+              engineer: getRoleName(data.engineer_id),
+              score: data.score,
+              reason: data.reason,
+              dimensions: data.dimensions,
+              task_type: data.task_type || '教学任务'
+            });
+            triggerPulse('quality');
+            triggerPulse('performance');
+            showQualityPopup.value = true;
+            setTimeout(() => showQualityPopup.value = false, 6000);
+            // 自动切换到质量报告 Tab，让用户直接看到结果
+            currentTab.value = 'quality';
+            const engScore = engineers.value.find(e => e.id === data.engineer_id);
+            if (engScore) engScore.score = data.score;
+            loadPerformanceData();
+            break;
+          }
+          case 'message': {
+            const txt = (data.content != null) ? String(data.content) : '';
+            if (!txt) break;
+            contentBuffer += txt;
+            if (!contentElement) {
+              // 只选当前 loading 气泡里的容器（display:block），避免误选历史消息里的隐藏节点
+              const candidates = document.querySelectorAll('.msg-row.bot .stream-content-container');
+              contentElement = candidates[candidates.length - 1] || null;
+              if (contentElement) contentElement.style.display = 'block';
+            }
+            if (contentElement) {
+              updateMarkdown(contentElement, contentBuffer);
+            }
+            break;
+          }
+          case 'file_done':
+            currentFiles.value.push({ filename: data.filename, content: data.content, language: data.language, expanded: false });
+            break;
+          case 'error':
+            loading.value = false;
+            if (contentElement) contentElement.classList.add('done');
+            {
+              const errBox = document.createElement('div');
+              errBox.className = 'error-card';
+              errBox.innerHTML = `<span class="err-icon">⚠</span><div class="err-body"><div class="err-title">生成出错</div><div class="err-detail">${data.content || '未知错误'}</div><div class="err-hint">请重试或新建教学会话</div></div>`;
+              const containers = document.querySelectorAll('.msg-row.bot .stream-content-container');
+              const target = containers[containers.length - 1];
+              if (target) { target.style.display='block'; target.appendChild(errBox); }
+            }
+            break;
+          case 'finish':
+            if (data && data.session_id) {
+              messages.value.push({
+                role: 'assistant',
+                content: contentBuffer,
+                steps: [...currentSteps.value],
+                files: [...currentFiles.value],
+                finishData: data,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              });
+              // 修复：统计真实生成的文件数量
+              roundStats.generated = data.file_count || currentFiles.value.length;
+              roundStats.tasksDone++;
+              triggerPulse('generated');
+              triggerPulse('parallel');
+
+              // 保存会话数据到数据库（聊天记录 + zip）
+              (async () => {
+                try {
+                  const formData = new FormData();
+                  formData.append('session_id', data.session_id);
+                  formData.append('messages', JSON.stringify(messages.value));
+                  await fetch('/api/session/save', { method: 'POST', body: formData });
+                } catch (e) { console.error('保存会话失败', e); }
+              })();
+
+              // 统计用户总任务数 (绑定到用户)
+              if (currentUser.value && !currentUser.value.isGuest) {
+                const users = JSON.parse(localStorage.getItem('educode_users') || '{}');
+                const uname = currentUser.value.username.toLowerCase();
+                if (users[uname]) {
+                  users[uname].totalTasks = (users[uname].totalTasks || 0) + 1;
+                  localStorage.setItem('educode_users', JSON.stringify(users));
+                }
+              }
+            }
+            loading.value = false;
+            if (contentElement) contentElement.classList.add('done');
+            engineers.value.forEach(e => { e.active = false; e.status = 'online'; e.progress = 0; });
+            loadPerformanceData();
+            break;
+        }
+        scrollToBottom();
+      };
+
+      const scrollToBottom = () => nextTick(() => {
+        if (messagesContainer.value) {
+          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+        }
+      });
+      const renderMarkdown = (t) => marked.parse(t || '');
+      const highlightCode = (c, l) => hljs.highlight(c, { language: hljs.getLanguage(l) ? l : 'plaintext' }).value;
+      const copyCode = (c, e) => {
+        navigator.clipboard.writeText(c);
+        const el = e.target; el.innerText = '已复制 ✓';
+        setTimeout(() => el.innerText = '复制', 1500);
+      };
+      const downloadProject = (d) => window.location.href = `/api/download/${d.session_id}`;
+      const getAgentClass = (r) => ({ '代码示例工程师': 'rd', '可视化设计工程师': 'ui', '习题设计工程师': 'pk' }[r] || 'pm');
+      const getAgentIcon = (r) => ({ '代码示例工程师': '💻', '可视化设计工程师': '🎨', '习题设计工程师': '🧪' }[r] || '📋');
+      const getTagClass = (r) => ({ '代码示例工程师': 'tag-rd', '可视化设计工程师': 'tag-ui', '习题设计工程师': 'tag-pk' }[r] || 'tag-pm');
+      const getTagLabel = (r) => ({ '代码示例工程师': 'RD', '可视化设计工程师': 'UI', '习题设计工程师': 'PK' }[r] || 'PM');
+      const getRoleName = (r) => ({ 'RD': '代码示例', 'UI': '可视化', 'PK': '习题设计' }[r] || r);
+      const getRoleIcon = (r) => ({ 'RD': '💻', 'UI': '🎨', 'PK': '🧪' }[r] || '❓');
+      const getConfidenceClass = (l) => ({ 'high': 'conf-high', 'medium': 'conf-mid', 'low': 'conf-low' }[l] || 'conf-mid');
+      const rtsmGradient = (v, c) => `conic-gradient(${c} ${(v||0)*360}deg, var(--bg) 0deg)`;
+      const sparklinePath = (trend) => {
+        if (!trend?.length) return '';
+        const m = Math.max(...trend), n = Math.min(...trend), r = (m - n) || 1;
+        return `M 0 ${20-(trend[0]-n)/r*20} ` + trend.map((v, i) => `L ${i*100/(trend.length-1)} ${20-(v-n)/r*20}`).join(' ');
+      };
+
+      onMounted(() => { fetchEngineers(); loadPerformanceData(); });
+
+      return {
+        currentMode, messages, input, loading, currentStreamContent, currentSteps, currentFiles, currentFinishData, engineers, settings, messagesContainer,
+        activeTag, quickTags, inputPlaceholder, avgQuality, avgPerfScore, hasPerformance, roundStats, statsChanged, parallelTasks, ahpData, performanceStats, currentTab, showQualityPopup, qualityData,
+        resetSession, useQuickTag, sendMessage, renderMarkdown, highlightCode, copyCode, downloadProject, onLanguageChange, loadPerformanceData,
+        getAgentClass, getAgentIcon, getTagClass, getTagLabel, getRoleName, getRoleIcon, getConfidenceClass, rtsmGradient, sparklinePath, qualityHistory, loadHistoryDetail,
+        currentUser, authMode, authLoading, authError, authSuccess, authForm, showUserMenu, doAuth, guestLogin, logout,getUsers
+      };
+    }
+  }).mount('#app');
+</script>
+<!-- 
+  FEATURE CHECKLIST:
+  [✓] 顶部模式切换 (普通/进阶)
+  [✓] 左侧下拉框联动与绩效刷新
+  [✓] 新建教学会话 (状态全重置)
+  [✓] 顶部快捷标签模板填充
+  [✓] SSE 全事件流处理 (分派/并行/质量/消息)
+  [✓] 右侧历史绩效趋势面板 (SVG 迷你图)
+  [✓] 本轮统计实时联动 (动画反馈)
+  [✓] 智能体团队卡片动态高亮
+  [✓] 代码块复制与行号样式
+  [✓] 输入框交互优化 (状态禁用)
+  [✓] 智能体团队卡片：已恢复并对接数据
+  [✓] 流式输出效果：逐行打字机动画
+  [✓] 后端步骤信息：AssignRole/WritePRD 等实时卡片展示
+-->
+</body>
+</html>
