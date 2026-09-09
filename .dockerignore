@@ -1,0 +1,9 @@
+workspace
+tmp
+build
+workspace
+dist
+data
+geckodriver.log
+logs
+storage
