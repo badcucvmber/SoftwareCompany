@@ -1,0 +1,29 @@
+# RTSM模型核心参数配置文件
+weight:
+  base_score: 0.6    # 基础特征分总权重（Tech+Comp+Hist）
+  symbiosis_score: 0.4  # 共生特征分总权重（SS）
+  base_detail:  # 基础分内部权重（Tech:0.2, Comp:0.1, Hist:0.1 → 合计0.4，乘以base_score=0.6后总权重0.24）
+    tech_stack: 0.2
+    complexity: 0.1
+    history_score: 0.1
+tqg:
+  alpha_beta:
+    high_complexity: {alpha: 0.4, beta: 0.6}  # 项目复杂度≥7时的α/β
+    low_complexity: {alpha: 0.6, beta: 0.4}   # 项目复杂度<7时的α/β
+  complexity_threshold: 7  # 高/低复杂度分界值
+  r_e_t:  # 冗余能力（R(e,T)）的范围限制
+    min: 1.0
+    max: 2.0
+eep:
+  normalize_coeff: 10  # EEP标准化系数（Σ结果除以该值）
+  default_proficiency: 0.2  # 工程师无对应技能时的默认熟练度
+ss:
+  gamma_threshold:  # 不同项目类型的γ触发阈值
+    ui: 0.4
+    web: 0.5
+    python: 0.55
+    general: 0.5
+  gamma_value:  # γ的取值
+    high: 1.2  # EEP/TQG均超过阈值时
+    low: 1.0   # 未超过阈值时
+  ss_max: 1.0  # 共生度SS的最大值限制
